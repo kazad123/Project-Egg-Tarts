@@ -6,11 +6,11 @@ title:  Team
 # {{ page.title }}
 
 
-## USER 1
-***UCI Net ID***: ucinetid1
+## Kayvaan Azad
+***UCI Net ID***: kazad@uci.edu
 
-## USER 2
-***UCI Net ID***: ucinetid2
+## Jason Ren
+***UCI Net ID***: jzren@uci.edu
 
-## USER 3
-***UCI Net ID***: ucinetid3
+## Omkar Kawade
+***UCI Net ID***: okawade@uci.edu
