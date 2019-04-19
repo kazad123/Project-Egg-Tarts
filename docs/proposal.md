@@ -4,7 +4,7 @@ title: Proposal
 ---
 
 ## Summary of Project
-Our project is agent vs agent artificial intelligence combat. This will work by spawning two agents in a designated arena, and having them fight to the death. The agents will be starting with swords to fight, and we will also be including the Dragonball mod so the agents have more choices for combat. There will be no inputs from the user, so the input of this project is just the agents spawning in the arena. The output of this project are the agent's actions until one agent dies. Each agent will be its own A.I based on two separate models. The goal of this project is to implement Q-learning, where the agents have to learn based on past experiences, rather than information about the environment.
+Our project is agent vs agent artificial intelligence combat. This will work by spawning two agents in a designated arena, and having them fight to the death. We will first use our sanity cases to determine whether the agent is moving and attacking correctly. After these checks are passed, we will spawn our two agents that will be starting with swords to fight. We will also be including the Dragonball mod so the agents have more choices for combat. There will be no inputs from the user, so the input of this project is just the agents spawning in the arena. The output of this project are the agent's actions until one agent dies. Each agent will be its own A.I. based on two separate models. The goal of this project is to implement Q-learning, where the agents have to learn based on past experiences, rather than information about the environment.
 
 ## AI/ML Algorithms
 Reinforcement learning with Q-learning
