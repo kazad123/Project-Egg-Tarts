@@ -14,5 +14,5 @@ Our performance of our project can be measure by three metrics. The first is the
 
 To evaluate the agent's performance by having sanity checks. Our first sanity check would be against another non-moving and non-fighting agent to make sure the agent has succesfully recognized another person and that there is successfull combat attacks. The next sanity check would be on a moving and non-fighting agent to see if our agent can follow the other succesfully, and to make sure successful attacks are made. Another sanity check is to have a timer to make sure the agents do not go on forever fighting, and so that we can make sure a correct action is being made. Our moonshot case, would be three or more agents dueling in a battle royale.
 
-##Appointment with Instructor
+## Appointment with Instructor
 Our appointment is on April 25th at 2:30pm
