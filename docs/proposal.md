@@ -4,10 +4,12 @@ title: Proposal
 ---
 
 ## Summary of Project
-Our project aims to create an agent vs agent artificial intelligence combat system. This will be implemented by Q-learning, where the agents learn based on past experiences, rather than actual environment information. The environment begins with two agents in a designated arena, where they fight to the death. Each agent will be its own A.I. based on two separate models. We will first use our sanity cases to determine whether the agent is moving and attacking correctly. After these checks are passed, we will spawn our two agents that will be starting with swords to fight. We will also be including the Dragonball mod so the agents have more choices for combat. Our only inputs are the spawned agents in the arena.  The output of this project are the agent's actions until one agent dies. 
+Our project aims to create a two agent artificial combat system where instead of using hit points and damage, each agent aims to knock the other agents off the stage, based on the fighting game series Super Smash Bros. This will be implemented using NEAT. 
+
+The environment begins with a relatively flat stage with the two agents spawned on opposite sides.  A timer will also be incorporated to encourage the agents to play more aggressively and speed up each game. Each agent is equipped with a weapon that has increased knock back. Ideally, every time the agent is hit, its knock back is also increased slightly, so that the agents are actively encouraged to dodge.
 
 ## AI/ML Algorithms
-Reinforcement learning with Q-learning
+Reinforcement learning using NEAT
 
 ## Evaluation Plan
 Our performance of our project can be measure by three metrics. The first is the remaining health of the living agent. The second is the number of swings of the sword by the "winner". The third is the amount of time combat lasted for. We can use these metrics to determine how well our project has gone so far. A greater remaining health of the living agent could mean that agent was trained better than the other. The lower the number of swings by the "winner" is better because that means the "winner" has been more efficient and accurate. If we look at how long the duel lasts, the shorter the time means that one agent is highly more trained than the other.
