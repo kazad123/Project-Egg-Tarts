@@ -5,21 +5,115 @@ import time
 import random
 import json
 import pickle
-sys.path.insert(0, '../../')
-from Neat_Fighter.src.Fighter import Fighter
-sys.path.insert(0, '../neat-python')
+import os
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
+
+from Fighter import Fighter
 import neat
 
 
 def get_mission_XML():
-    mission_xml =
+    mission_xml = '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+    <Mission xmlns="http://ProjectMalmo.microsoft.com"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+      <About>
+        <Summary>Fighting 1v1</Summary>
+      </About>
+    
+      <ServerSection>
+        <ServerInitialConditions>
+                <Time>
+                    <StartTime>6000</StartTime>
+                    <AllowPassageOfTime>true</AllowPassageOfTime>
+                </Time>
+                <Weather>clear</Weather>
+                <AllowSpawning>false</AllowSpawning>
+        </ServerInitialConditions>
+        <ServerHandlers>
+          <FlatWorldGenerator generatorString="3;7,3*10;1;"/>
+          <DrawingDecorator>
+    
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="0" x2="11" z1="0" z2="0" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="0" x2="0" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="1" x2="1" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="2" x2="2" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="3" x2="3" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="4" x2="4" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="5" x2="5" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="6" x2="6" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="7" x2="7" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="8" x2="8" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="9" x2="9" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="10" x2="10" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="11" x2="11" z1="0" z2="11" />
+                <DrawLine type="diamond_block" y1="10" y2="10" x1="11" x2="0" z1="11" z2="11" />
+    
+          </DrawingDecorator>
+    
+          <ServerQuitFromTimeUp description="" timeLimitMs="10000"/>
+          <ServerQuitWhenAnyAgentFinishes/>
+        </ServerHandlers>
+      </ServerSection>
+    
+      <AgentSection mode="Adventure">
+        <Name>Fighter1</Name>
+        <AgentStart>
+            <Placement pitch="0" x="3" y="11" yaw="0" z="3"/>
+            <Inventory>
+                <InventoryItem slot="0" type="wooden_sword" quantity="1" />
+            </Inventory>
+    
+        </AgentStart>
+        <AgentHandlers>
+        <ObservationFromFullStats/>
+        <ContinuousMovementCommands turnSpeedDegs="360"/>
+          <ObservationFromNearbyEntities>
+            <Range name="entities" xrange="10" yrange="1" zrange="10"/>
+          </ObservationFromNearbyEntities>
+          <ObservationFromGrid>
+            <Grid name="floor">
+                <min x="-1" y="0" z="-1"/>
+                <max x="1" y="0" z="1"/> </Grid>
+          </ObservationFromGrid>
+        </AgentHandlers>
+      </AgentSection>
+      
+        <AgentSection mode="Adventure">
+    <Name>Fighter2</Name>
+    <AgentStart>
+        <Inventory>
+            <InventoryItem slot="0" type="wooden_sword" quantity="1" />
+        </Inventory>
+        <Placement pitch="0" x="5" y="11" yaw="0" z="5"/>
+    </AgentStart>
+    <AgentHandlers>
+    <ObservationFromFullStats/>
+    <ContinuousMovementCommands turnSpeedDegs="360"/>
+      <ObservationFromNearbyEntities>
+        <Range name="entities" xrange="10" yrange="1" zrange="10"/>
+      </ObservationFromNearbyEntities>
+      <ObservationFromGrid>
+        <Grid name="floor">
+            <min x="-1" y="0" z="-1"/>
+            <max x="1" y="0" z="1"/> </Grid>
+      </ObservationFromGrid>
+    </AgentHandlers>
+  </AgentSection>
+  
+        
+    </Mission> '''
+
 
     return mission_xml
+
 
 def get_mission():
     mission_xml = get_mission_XML()
     my_mission = MalmoPython.MissionSpec(mission_xml, True)
     return my_mission
+
 
 class World:
     def __init__(self, client_pool): 
@@ -30,11 +124,16 @@ class World:
         i = 0
         while True:
             i += 1
+
             self.best_genome = population.run(self.evaluate_genome, 1)
             with open('gen-{}-winner'.format(i), 'wb') as f:
                 pickle.dump(self.best_genome, f)
             return self.best_genome
 
+
+    # def start_fight(self,genome1, genome2, config):
+    #     agents, agents_fighter = self.setup_fighters([genome1, genome2], config)
+    #     return self.run_fighters(*agents_fighter)
 
     def start_fight(self,genome1, genome2, config):
         agents, agents_fighter = self.setup_fighters([genome1, genome2], config)
@@ -44,7 +143,10 @@ class World:
     def setup_fighters(self, genomes, config):
         if len(genomes) != 2:
             raise Exception("Size of argument genomes is not 2")
+        # if len(genomes) != 1:
+        #     raise Exception("Size of argument genomes is not 1")
         agents = [MalmoPython.AgentHost() for i in range(2)]
+        # agents = [MalmoPython.AgentHost()]
         self.start_mission(agents)
         agents_fighter = []
         print("setup fighters")
@@ -67,18 +169,19 @@ class World:
 
     def run_fighters(self, fighter1, fighter2):
         while fighter1.isRunning() or fighter2.isRunning():
+            print("running.....\n")
             fighter1.run()
-            fighter2.run()
-            time.sleep(0.2)
+            fighter2.runNothing()
+            time.sleep(0.5)
             for error in fighter1.agent.peekWorldState().errors:
                 print ("Fighter 1 Error:",error.text)
             for error in fighter2.agent.peekWorldState().errors:
                 print ("Fighter 2 Error:",error.text)
-
-        fighter1_damage_inflicted = fighter2.data.get(u'DamageTaken')
+            #
+            # fighter1_damage_inflicted = fighter2.data.get(u'DamageTaken')
         fighter1_damage_taken = fighter1.data.get(u'DamageTaken')
         fighter1_mission_time = fighter1.data.get(u'TotalTime')
-        fighter1.fighter_result.SetDamageInflicted(fighter1_damage_inflicted)
+        # fighter1.fighter_result.SetDamageInflicted(fighter1_damage_inflicted)
         fighter1.fighter_result.SetMissionTime(fighter1_mission_time)
         fighter1.fighter_result.SetDamageTaken(fighter1_damage_taken)
         fighter1_fitness = fighter1.fighter_result.GetFitness()

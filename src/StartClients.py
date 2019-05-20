@@ -7,15 +7,13 @@ import os
 import sys
 # from . import World
 sys.path.insert(0, '../neat-python')
-sys.path.insert(0, '../../')
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
 
-from Neat_Fighter.src.World import World
-from Neat_Fighter.src.Fighter import Fighter
-
+from World import World
+import visualize
 import neat
 import pickle
-import Neat_Fighter.src.Fighter as Fighter
-import Neat_Fighter.src.visualize as visualize
 
 from collections import Counter
 
@@ -24,6 +22,8 @@ def SetupClientPools():
     client_pool = MalmoPython.ClientPool()
     for i in range(2):
         client_pool.add(MalmoPython.ClientInfo('127.0.0.1', 10000+i))
+
+    # client_pool.add(MalmoPython.ClientInfo('127.0.0.1', 10000))
     return client_pool
 
 
@@ -42,7 +42,7 @@ def InitalizeNEATPopulation():
 
 if __name__ == "__main__":
     world = World(SetupClientPools())
-
+    print(world)
     if len(sys.argv) >= 3:
         with open(sys.argv[1], 'rb') as g1:
             genome1 = pickle.load(g1)
@@ -64,6 +64,7 @@ if __name__ == "__main__":
         population.add_reporter(stats)
         try:
             winner = world.train(population)
+
         except KeyboardInterrupt:
             winner = population.best_genome
             print("winner is")

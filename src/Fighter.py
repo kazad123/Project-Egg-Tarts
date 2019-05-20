@@ -2,13 +2,15 @@ import MalmoPython
 import random
 import time
 import sys
+import os
 sys.path.insert(0, '../../')
-from Neat_Fighter.src.runtime_configs import DEBUGGING
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
 
 import json
 from threading import Timer
 import math
-from Neat_Fighter.src.AgentResult import AgentResult
+from AgentResult import AgentResult
 
 '''
 Fighter will holds all the definition of what our agents can do
@@ -53,6 +55,17 @@ class Fighter:
     def isRunning(self):
         return not self.mission_ended and self.agent.peekWorldState().is_mission_running
 
+    def runNothing(self):
+        while self.agent.peekWorldState().number_of_observations_since_last_state == 0:
+            if not self.isRunning():
+                print("agent not running")
+                return
+
+        if self.mission_ended or not self.agent.peekWorldState().is_mission_running:
+            return
+
+        return
+
     def run(self):
         # print(self.agent)
         # print(self.isRunning())
@@ -64,23 +77,32 @@ class Fighter:
         self.world_state = self.agent.getWorldState()
         self.data = json.loads(self.world_state.observations[-1].text)
 
-        if self.neural == None:
+        rnd = random.random()
+        actions = ["jump 1", "wait 1", "move 1", "turn 1"]
+        a = random.randint(0, len(actions) - 1)
+
+        print(actions[a])
+        self.agent.sendCommand(actions[a])
+
+        if self.neural is None:
             return
 
         agent_state_input = self._get_agent_state_input()
         scaled_state_input = scale_state_inputs(agent_state_input)
         output = self.neural.activate(scaled_state_input)
         print(scaled_state_input)
-        if DEBUGGING:
-            print("angle {:.2f}; dist {:.2f};   move {:.3f}; strafe {:.3f}; turn {:.3f}; attack {:.3f}".format(*(agent_state_input + output)))
+        print("angle {:.2f}; dist {:.2f};   move {:.3f}; strafe {:.3f}; turn {:.3f}; attack {:.3f}".format(*(agent_state_input + output)))
 
         if self.mission_ended or not self.agent.peekWorldState().is_mission_running:
             return
 
-        self.agent.sendCommand("move {}".format(output[0]))
-        self.agent.sendCommand("strafe {}".format(output[1]))
-        self.agent.sendCommand("turn {}".format(output[2]))
-        self.agent.sendCommand("attack {}".format(0 if output[3] <= 0 else 1))
+        # rnd = random.random()
+        # a = random.randint(0, len(actions) - 1)
+
+        # self.agent.sendCommand("move {}".format(output[0]))
+        # self.agent.sendCommand("strafe {}".format(output[1]))
+        # self.agent.sendCommand("turn {}".format(output[2]))
+        # self.agent.sendCommand("attack {}".format(0 if output[3] <= 0 else 1))
         
     def _get_agent_state_input(self):
         to_return = []
