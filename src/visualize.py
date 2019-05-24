@@ -170,7 +170,8 @@ def draw_net(config, genome, view=False, filename=None, node_names=None, show_di
                     used_nodes.add(a)
             pending = new_pending
     else:
-        used_nodes = set(genome.nodes.keys())
+        if genome is not None:
+            used_nodes = set(genome.nodes.keys())
 
     for n in used_nodes:
         if n in inputs or n in outputs:

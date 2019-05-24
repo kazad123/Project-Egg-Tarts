@@ -62,7 +62,7 @@ def get_mission_XML():
         <AgentStart>
             <Placement pitch="0" x="3" y="11" yaw="0" z="3"/>
             <Inventory>
-                <InventoryItem slot="0" type="wooden_sword" quantity="1" />
+                <InventoryItem slot="0" type="stick" quantity="1" />
             </Inventory>
     
         </AgentStart>
@@ -77,6 +77,9 @@ def get_mission_XML():
                 <min x="-1" y="0" z="-1"/>
                 <max x="1" y="0" z="1"/> </Grid>
           </ObservationFromGrid>
+          <RewardForTouchingBlockType>
+            <Block reward="-100.0" type="lava" behaviour="onceOnly"/>
+            </RewardForTouchingBlockType>
         </AgentHandlers>
       </AgentSection>
       
@@ -84,9 +87,9 @@ def get_mission_XML():
     <Name>Fighter2</Name>
     <AgentStart>
         <Inventory>
-            <InventoryItem slot="0" type="wooden_sword" quantity="1" />
+                <InventoryItem slot="0" type="stick" quantity="1" />
         </Inventory>
-        <Placement pitch="0" x="5" y="11" yaw="0" z="5"/>
+        <Placement pitch="0" x="11" y="11" yaw="0" z="11"/>
     </AgentStart>
     <AgentHandlers>
     <ObservationFromFullStats/>
@@ -105,7 +108,6 @@ def get_mission_XML():
         
     </Mission> '''
 
-
     return mission_xml
 
 
@@ -119,37 +121,30 @@ class World:
     def __init__(self, client_pool): 
         self.client_pool = client_pool
         self.best_genome = None
+        self.mission = get_mission()
 
     def train(self, population):
         i = 0
         while True:
             i += 1
-
             self.best_genome = population.run(self.evaluate_genome, 1)
             with open('gen-{}-winner'.format(i), 'wb') as f:
+                print("Dumping best genome.....")
                 pickle.dump(self.best_genome, f)
+
             return self.best_genome
-
-
-    # def start_fight(self,genome1, genome2, config):
-    #     agents, agents_fighter = self.setup_fighters([genome1, genome2], config)
-    #     return self.run_fighters(*agents_fighter)
 
     def start_fight(self,genome1, genome2, config):
         agents, agents_fighter = self.setup_fighters([genome1, genome2], config)
         return self.run_fighters(*agents_fighter)
 
-
     def setup_fighters(self, genomes, config):
         if len(genomes) != 2:
             raise Exception("Size of argument genomes is not 2")
-        # if len(genomes) != 1:
-        #     raise Exception("Size of argument genomes is not 1")
-        agents = [MalmoPython.AgentHost() for i in range(2)]
-        # agents = [MalmoPython.AgentHost()]
+
+        agents = [MalmoPython.AgentHost() for i in range(len(genomes))]
         self.start_mission(agents)
         agents_fighter = []
-        print("setup fighters")
         for i in range(2):
             agents_fighter.append(Fighter(agents[i], None if genomes[i] == None else
                                   neat.nn.FeedForwardNetwork.create(genomes[i], config)))
@@ -162,42 +157,52 @@ class World:
                 agents, agents_fighter = self.setup_fighters([genome, self.best_genome], config)
                 genome.fitness = self.run_fighters(*agents_fighter)
                 # if DEBUGGING:
-                print("printing the genomes")
-                print (genome)
+                # print("printing the genomes")
+                # print (genome)
                 del agents
                 del agents_fighter
 
     def run_fighters(self, fighter1, fighter2):
+        print("Running.....\n")
         while fighter1.isRunning() or fighter2.isRunning():
-            print("running.....\n")
             fighter1.run()
             fighter2.runNothing()
-            time.sleep(0.5)
+            time.sleep(1)
+
             for error in fighter1.agent.peekWorldState().errors:
                 print ("Fighter 1 Error:",error.text)
             for error in fighter2.agent.peekWorldState().errors:
                 print ("Fighter 2 Error:",error.text)
-            #
-            # fighter1_damage_inflicted = fighter2.data.get(u'DamageTaken')
+
+        if fighter1.data is not None:
+            print("Fighter 1 data: ")
+            print(fighter1.data)
+            print("Damage taken: " + str(fighter1.data.get(u'DamageTaken')))
+            print("Past dmg: " + str(fighter1.fighter_result.damage_taken))
+
+        if fighter2.data is not None:
+            fighter2_life = fighter2.data.get(u'life')
+            if fighter2_life == 0:
+                fighter1.fighter_result.killed_fighter = True
+                print("Fighter 2 was slain!!!!")
+
+
+        fighter1.fighter_result.isAlive = fighter1.data.get(u'IsAlive')
+        fighter1.fighter_result.life = fighter1.data.get(u'Life')
         fighter1_damage_taken = fighter1.data.get(u'DamageTaken')
         fighter1_mission_time = fighter1.data.get(u'TotalTime')
-        # fighter1.fighter_result.SetDamageInflicted(fighter1_damage_inflicted)
         fighter1.fighter_result.SetMissionTime(fighter1_mission_time)
         fighter1.fighter_result.SetDamageTaken(fighter1_damage_taken)
         fighter1_fitness = fighter1.fighter_result.GetFitness()
 
         return fighter1_fitness
 
-
     def start_mission(self, agent_hosts):
-        self.mission = get_mission()
         expId = str(uuid.uuid4())
         for i in range(len(agent_hosts)):
             while True:
                 try:
                     print("trying to start agent {}".format(i))
-                    # print(self.client_pool)
-                    # print(agent_hosts)
                     agent_hosts[i].startMission(self.mission, self.client_pool, MalmoPython.MissionRecordSpec(), i, expId )
                     break
                 except Exception as e:
@@ -207,6 +212,7 @@ class World:
 
         hasBegun = 0
         hadErrors = False
+
         while hasBegun < len(agent_hosts) and not hadErrors:
             time.sleep(0.1)
             for ah in agent_hosts:

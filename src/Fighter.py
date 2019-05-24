@@ -64,11 +64,12 @@ class Fighter:
         if self.mission_ended or not self.agent.peekWorldState().is_mission_running:
             return
 
+        self.world_state = self.agent.getWorldState()
+        self.data = json.loads(self.world_state.observations[-1].text)
+
         return
 
     def run(self):
-        # print(self.agent)
-        # print(self.isRunning())
         while self.agent.peekWorldState().number_of_observations_since_last_state == 0:
             if not self.isRunning():
                 return
@@ -77,12 +78,12 @@ class Fighter:
         self.world_state = self.agent.getWorldState()
         self.data = json.loads(self.world_state.observations[-1].text)
 
-        rnd = random.random()
-        actions = ["jump 1", "wait 1", "move 1", "turn 1"]
-        a = random.randint(0, len(actions) - 1)
-
-        print(actions[a])
-        self.agent.sendCommand(actions[a])
+        # rnd = random.random()
+        # actions = ["jump 1", "wait 1", "move 1", "turn 1"]
+        # a = random.randint(0, len(actions) - 1)
+        #
+        # print(actions[a])
+        # self.agent.sendCommand(actions[a])
 
         if self.neural is None:
             return
@@ -90,25 +91,31 @@ class Fighter:
         agent_state_input = self._get_agent_state_input()
         scaled_state_input = scale_state_inputs(agent_state_input)
         output = self.neural.activate(scaled_state_input)
-        print(scaled_state_input)
-        print("angle {:.2f}; dist {:.2f};   move {:.3f}; strafe {:.3f}; turn {:.3f}; attack {:.3f}".format(*(agent_state_input + output)))
+        # print(scaled_state_input)
+        # print("angle {:.2f}; dist {:.2f};   move {:.3f}; strafe {:.3f}; turn {:.3f}; attack {:.3f}".format(*(agent_state_input + output)))
 
         if self.mission_ended or not self.agent.peekWorldState().is_mission_running:
             return
 
-        # rnd = random.random()
-        # a = random.randint(0, len(actions) - 1)
+        print("Actions: ")
+        print("move: {}".format(output[0]))
+        print("strafe: {}".format(output[1]))
+        print("turn: {}".format(output[2]))
+        print("attack: 1")
 
-        # self.agent.sendCommand("move {}".format(output[0]))
-        # self.agent.sendCommand("strafe {}".format(output[1]))
-        # self.agent.sendCommand("turn {}".format(output[2]))
+        self.agent.sendCommand("move {}".format(output[0]))
+        self.agent.sendCommand("strafe {}".format(output[1]))
+        self.agent.sendCommand("turn {}".format(output[2]))
         # self.agent.sendCommand("attack {}".format(0 if output[3] <= 0 else 1))
+        self.agent.sendCommand("attack 1")
         
     def _get_agent_state_input(self):
         to_return = []
         entities = self.data.get(u'entities')
+
         if self.data.get(u'PlayersKilled') == 1:
             self.mission_ended = True
+
         agent_x, agent_z, agent_yaw = entities[0][u'x'], entities[0][u'z'], math.radians((entities[0][u'yaw'] - 90) % 360)
         if len(entities) > 1:
             other_entities = entities[1:]
