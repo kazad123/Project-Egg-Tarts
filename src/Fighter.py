@@ -26,7 +26,9 @@ def angle(a1,a2,b1,b2):
 
 def angle_between_agents(a1,a2,yaw1,b1,b2):
     angl = angle(a1,a2,b1,b2)
-    relative_angle = angl - yaw1 
+    relative_angle = angl - yaw1
+    rad = (2 * math.pi) - ((relative_angle + math.pi)%(2*math.pi))
+
     return (2 * math.pi) - ((relative_angle + math.pi)%(2*math.pi))
 
 
@@ -40,7 +42,7 @@ def scale_distance(distance):
 
 
 def scale_angle(theta):
-    return (theta/math.pi) 
+    return (theta/math.pi)
 
 
 class Fighter:
@@ -51,6 +53,7 @@ class Fighter:
         self.mission_ended = False
         self.world_state = None
         self.data = None
+        self.angle_list = []
 
     def isRunning(self):
         return not self.mission_ended and self.agent.peekWorldState().is_mission_running
@@ -97,7 +100,6 @@ class Fighter:
         if self.mission_ended or not self.agent.peekWorldState().is_mission_running:
             return
 
-        print("Action: ")
         print("move: {}".format(output[0]))
         print("strafe: {}".format(output[1]))
         print("turn: {}".format(output[2]))
@@ -118,13 +120,23 @@ class Fighter:
             self.mission_ended = True
 
         agent_x, agent_z, agent_yaw = entities[0][u'x'], entities[0][u'z'], math.radians((entities[0][u'yaw'] - 90) % 360)
+
         if len(entities) > 1:
             other_entities = entities[1:]
-            other_entities = [(ent, math.hypot(entities[0][u'x'] - ent[u'x'], entities[0][u'z'] - ent[u'z'])) for ent in other_entities]
+            other_entities = [(ent, math.hypot(entities[0][u'x'] - ent[u'x'], entities[0][u'z'] - ent[u'z']))
+                              for ent in other_entities]
             other_entities = sorted(other_entities, key=lambda x: x[1])[0]
-            closest_ent_x, closest_ent_z, closest_ent_dist = other_entities[0][u'x'], other_entities[0][u'z'], other_entities[1]
-            self.fighter_result.AppendDistance(closest_ent_dist)
-            to_return.extend([angle_between_agents(agent_x, agent_z, agent_yaw, closest_ent_x, closest_ent_z), closest_ent_dist])
+
+            closest_ent_x, closest_ent_z, closest_ent_dist = other_entities[0][u'x'], other_entities[0][u'z'], \
+                                                             other_entities[1]
+            self.fighter_result.distance = closest_ent_dist
+            rad = angle_between_agents(agent_x, agent_z, agent_yaw, closest_ent_x, closest_ent_z)
+
+            degrees = rad*(180/math.pi)
+            self.angle_list.append(degrees)
+            print("Angle: " + str(degrees))
+            to_return.extend([angle_between_agents(agent_x, agent_z, agent_yaw, closest_ent_x, closest_ent_z),
+                              closest_ent_dist])
         else:
             to_return.extend([0, 0])
 

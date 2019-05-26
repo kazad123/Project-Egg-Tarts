@@ -8,9 +8,9 @@ import pickle
 import os
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
-
 from Fighter import Fighter
 import neat
+import statistics
 
 
 def get_mission_XML():
@@ -94,8 +94,6 @@ def get_mission_XML():
       </ObservationFromGrid>
     </AgentHandlers>
   </AgentSection>
-  
-        
     </Mission> '''
 
     return mission_xml
@@ -105,7 +103,7 @@ def get_mission():
     mission_xml = get_mission_XML()
     my_mission = MalmoPython.MissionSpec(mission_xml, True)
     return my_mission
-
+8
 
 class World:
     def __init__(self, client_pool): 
@@ -150,11 +148,12 @@ class World:
         count = 0
 
         while fighter1.isRunning() or fighter2.isRunning():
-            # 2nd agent does nothing
             print("Action " + str(count))
             count += 1
+            # 2nd agent does nothing
             fighter1.run()
             fighter2.runNothing()
+            # Runs for 10 seconds, every half second send command
             time.sleep(.5)
 
             for error in fighter1.agent.peekWorldState().errors:
@@ -181,8 +180,12 @@ class World:
                 self.agents_killed = fighter1.data.get(u'PlayersKilled')
             else:
                 fighter1.fighter_result.kill_count = 0
+
             fighter1.fighter_result.life = fighter1.data.get(u'Life')
-            print("Fighter 1 damage dealt: " + str(fighter1.fighter_result.damage_dealt) + "\n")
+            fighter1.fighter_result.angle = statistics.mean(fighter1.angle_list)
+            print("Fighter 1 damage dealt: " + str(fighter1.fighter_result.damage_dealt))
+            print("Fighter 1 average angle: " + str(fighter1.fighter_result.angle) + "\n")
+
 
         if fighter2.data is not None:
             print("Fighter 2 data: ")
