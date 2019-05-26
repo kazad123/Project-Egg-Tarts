@@ -66,18 +66,19 @@ class Fighter:
 
         self.world_state = self.agent.getWorldState()
         self.data = json.loads(self.world_state.observations[-1].text)
-
         return
 
     def run(self):
         while self.agent.peekWorldState().number_of_observations_since_last_state == 0:
             if not self.isRunning():
                 return
-            time.sleep(0.01)
+            time.sleep(0.1)
 
         self.world_state = self.agent.getWorldState()
         self.data = json.loads(self.world_state.observations[-1].text)
+        self.fighter_result.prev_dmg = self.data.get(u'DamageDealt')
 
+        # Random input
         # rnd = random.random()
         # actions = ["jump 1", "wait 1", "move 1", "turn 1"]
         # a = random.randint(0, len(actions) - 1)
@@ -91,24 +92,24 @@ class Fighter:
         agent_state_input = self._get_agent_state_input()
         scaled_state_input = scale_state_inputs(agent_state_input)
         output = self.neural.activate(scaled_state_input)
-        # print(scaled_state_input)
         # print("angle {:.2f}; dist {:.2f};   move {:.3f}; strafe {:.3f}; turn {:.3f}; attack {:.3f}".format(*(agent_state_input + output)))
 
         if self.mission_ended or not self.agent.peekWorldState().is_mission_running:
             return
 
-        print("Actions: ")
+        print("Action: ")
         print("move: {}".format(output[0]))
         print("strafe: {}".format(output[1]))
         print("turn: {}".format(output[2]))
-        print("attack: 1")
+        print("attack: 1\n")
 
         self.agent.sendCommand("move {}".format(output[0]))
         self.agent.sendCommand("strafe {}".format(output[1]))
         self.agent.sendCommand("turn {}".format(output[2]))
         # self.agent.sendCommand("attack {}".format(0 if output[3] <= 0 else 1))
+        # Always attack
         self.agent.sendCommand("attack 1")
-        
+
     def _get_agent_state_input(self):
         to_return = []
         entities = self.data.get(u'entities')

@@ -9,21 +9,15 @@ import sys
 sys.path.insert(0, '../neat-python')
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
-
 from World import World
-import visualize
 import neat
 import pickle
 
-from collections import Counter
 
-
-def SetupClientPools():
+def SetupClientPools(num_agents):
     client_pool = MalmoPython.ClientPool()
-    for i in range(2):
+    for i in range(num_agents):
         client_pool.add(MalmoPython.ClientInfo('127.0.0.1', 10000+i))
-
-    # client_pool.add(MalmoPython.ClientInfo('127.0.0.1', 10000))
     return client_pool
 
 
@@ -39,76 +33,21 @@ def InitalizeNEATPopulation():
     pop = neat.Population(config)
     return pop, config
 
-
 if __name__ == "__main__":
-    world = World(SetupClientPools())
-    print(world)
-    if len(sys.argv) >= 3:
-        with open(sys.argv[1], 'rb') as g1:
-            genome1 = pickle.load(g1)
-        with open(sys.argv[2], 'rb') as g2:
-            genome2 = pickle.load(g2)
+    num_agents = 2
+    world = World(SetupClientPools(num_agents))
 
-        print("Running {} against {}".format(sys.argv[1], sys.argv[2]))
-        fitness = world.StartFight(genome1, genome2, InitalizeNeatConfig())
-        print("TARGET: Fitness of {} against {} : {}".format(sys.argv[1], sys.argv[2], fitness))
-    else:
-        if len(sys.argv) == 2:
-            population, config = neat.Checkpointer.restore_checkpoint(str(sys.argv[1])), InitalizeNeatConfig()
-        else:
-            population, config = InitalizeNEATPopulation()
+    population, config = InitalizeNEATPopulation()
+    population.add_reporter(neat.StdOutReporter(True))
+    population.add_reporter(neat.Checkpointer(1, 900))
+    stats = neat.StatisticsReporter()
+    population.add_reporter(stats)
 
-        population.add_reporter(neat.StdOutReporter(True))
-        population.add_reporter(neat.Checkpointer(1,900))
-        stats = neat.StatisticsReporter()
-        population.add_reporter(stats)
-        try:
-            winner = world.train(population)
+    try:
+        winner = world.train(population)
+    except KeyboardInterrupt:
+        winner = population.best_genome
 
-        except KeyboardInterrupt:
-            winner = population.best_genome
-            print("winner is")
-            print(winner)
-
-        #save the winner stuff starts here
-        with open('winner-feedforward', 'wb') as f:
-            pickle.dump(winner, f)
-        print("winner is: ")
-        print(winner)
-        try:
-          visualize.plot_stats(stats, ylog=True, view=True, filename="feedforward-fitness.svg")
-          visualize.plot_species(stats, view=True, filename="feedforward-speciation.svg")
-        except:
-          pass
-        #pole balancing: node_names = {-1: 'x', -2: 'dx', -3: 'theta', -4: 'dtheta', 0: 'control'}
-        node_names = {-1: 'angle_to_enemy', -2: 'distance_to_enemy', 0: 'move', 1: 'strafe', 2: 'turn', 3: 'attack'}
-        visualize.draw_net(config, winner, True, node_names=node_names)
-
-        visualize.draw_net(config, winner, view=True, node_names=node_names,
-                           filename="winner-feedforward.gv")
-        visualize.draw_net(config, winner, view=True, node_names=node_names,
-                           filename="winner-feedforward-enabled.gv", show_disabled=False)
-        visualize.draw_net(config, winner, view=True, node_names=node_names,
-                           filename="winner-feedforward-enabled-pruned.gv", show_disabled=False, prune_unused=True)
-
-
-        with open('winner-feedforward', 'wb') as f:
-            pickle.dump(winner, f)
-
-        print(winner)
-
-        visualize.plot_stats(stats, ylog=True, view=True, filename="feedforward-fitness.svg")
-        visualize.plot_species(stats, view=True, filename="feedforward-speciation.svg")
-
-        node_names = {-1: 'x', -2: 'dx', -3: 'theta', -4: 'dtheta', 0: 'control'}
-        visualize.draw_net(config, winner, True, node_names=node_names)
-
-        visualize.draw_net(config, winner, view=True, node_names=node_names,
-                           filename="winner-feedforward.gv")
-        visualize.draw_net(config, winner, view=True, node_names=node_names,
-                           filename="winner-feedforward-enabled.gv", show_disabled=False)
-        visualize.draw_net(config, winner, view=True, node_names=node_names,
-                           filename="winner-feedforward-enabled-pruned.gv", show_disabled=False, prune_unused=True)
 
 
 
