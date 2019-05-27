@@ -37,9 +37,13 @@ if __name__ == "__main__":
     num_agents = 2
     world = World(SetupClientPools(num_agents))
 
-    population, config = InitalizeNEATPopulation()
+    if len(sys.argv) == 2:
+        population, config = neat.Checkpointer.restore_checkpoint(str(sys.argv[1])), InitalizeNeatConfig()
+    else:
+        population, config = InitalizeNEATPopulation()
+
     population.add_reporter(neat.StdOutReporter(True))
-    population.add_reporter(neat.Checkpointer(1, 900))
+    population.add_reporter(neat.Checkpointer(100, 300))
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
 

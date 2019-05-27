@@ -55,12 +55,12 @@ class Fighter:
         self.data = None
         self.angle_list = []
 
-    def isRunning(self):
+    def is_running(self):
         return not self.mission_ended and self.agent.peekWorldState().is_mission_running
 
-    def runNothing(self):
+    def run_nothing(self):
         while self.agent.peekWorldState().number_of_observations_since_last_state == 0:
-            if not self.isRunning():
+            if not self.is_running():
                 print("agent not running")
                 return
 
@@ -73,13 +73,12 @@ class Fighter:
 
     def run(self):
         while self.agent.peekWorldState().number_of_observations_since_last_state == 0:
-            if not self.isRunning():
+            if not self.is_running():
                 return
             time.sleep(0.1)
 
         self.world_state = self.agent.getWorldState()
         self.data = json.loads(self.world_state.observations[-1].text)
-        self.fighter_result.prev_dmg = self.data.get(u'DamageDealt')
 
         # Random input
         # rnd = random.random()
@@ -115,9 +114,9 @@ class Fighter:
     def _get_agent_state_input(self):
         to_return = []
         entities = self.data.get(u'entities')
-
-        if self.data.get(u'PlayersKilled') == 1:
-            self.mission_ended = True
+        #
+        # if self.data.get(u'PlayersKilled') == 1:
+        #     self.mission_ended = True
 
         agent_x, agent_z, agent_yaw = entities[0][u'x'], entities[0][u'z'], math.radians((entities[0][u'yaw'] - 90) % 360)
 
@@ -129,12 +128,12 @@ class Fighter:
 
             closest_ent_x, closest_ent_z, closest_ent_dist = other_entities[0][u'x'], other_entities[0][u'z'], \
                                                              other_entities[1]
-            self.fighter_result.distance = closest_ent_dist
+            self.fighter_result.ent_distance = closest_ent_dist
             rad = angle_between_agents(agent_x, agent_z, agent_yaw, closest_ent_x, closest_ent_z)
 
             degrees = rad*(180/math.pi)
             self.angle_list.append(degrees)
-            print("Angle: " + str(degrees))
+            # print("Angle: " + str(degrees))
             to_return.extend([angle_between_agents(agent_x, agent_z, agent_yaw, closest_ent_x, closest_ent_z),
                               closest_ent_dist])
         else:

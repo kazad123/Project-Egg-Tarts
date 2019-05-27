@@ -103,7 +103,7 @@ def get_mission():
     mission_xml = get_mission_XML()
     my_mission = MalmoPython.MissionSpec(mission_xml, True)
     return my_mission
-8
+
 
 class World:
     def __init__(self, client_pool): 
@@ -111,6 +111,7 @@ class World:
         self.best_genome = None
         self.mission = get_mission()
         self.damage_list = []
+        self.distance_list = []
         self.agents_killed = 0
 
     def train(self, population):
@@ -118,6 +119,8 @@ class World:
         while True:
             i += 1
             self.best_genome = population.run(self.evaluate_genome, 1)
+            with open('gen-{}-winner'.format(i), 'wb') as f:
+                pickle.dump(self.best_genome, f)
             return self.best_genome
 
     def start_fight(self, genome1, genome2, config):
@@ -147,14 +150,14 @@ class World:
     def run_fighters(self, fighter1, fighter2):
         count = 0
 
-        while fighter1.isRunning() or fighter2.isRunning():
+        while fighter1.is_running() or fighter2.is_running():
             print("Action " + str(count))
             count += 1
             # 2nd agent does nothing
             fighter1.run()
-            fighter2.runNothing()
-            # Runs for 10 seconds, every half second send command
-            time.sleep(.5)
+            fighter2.run_nothing()
+            # Runs for 10 seconds, every second send command
+            time.sleep(1)
 
             for error in fighter1.agent.peekWorldState().errors:
                 print("Fighter 1 Error: ", error.text)
@@ -163,16 +166,21 @@ class World:
 
         if fighter1.data is not None:
             print("Fighter 1 data: " + str(fighter1.data) + "\n")
-            # Calculate damage dealt
-            fighter1.fighter_result.prev_dmg = fighter1.fighter_result.damage_dealt
+
+            # Calculate damage dealt, distance traveled
             self.damage_list.append(fighter1.data.get(u'DamageDealt'))
+            self.distance_list.append(fighter1.data.get(u'DistanceTravelled'))
+
             if len(self.damage_list) > 1:
                 damage_dealt = self.damage_list[-1] - self.damage_list[-2]
+                distance_travelled = self.distance_list[-1] - self.distance_list[-2]
                 fighter1.fighter_result.damage_dealt = damage_dealt
+                fighter1.fighter_result.dist_travelled = distance_travelled
             else:
                 # Set to 0 at first because world will save previous missions result (if mission is not closed)
                 fighter1.data[u'DamageDealt'] = 0
                 fighter1.fighter_result.damage_dealt = fighter1.data.get(u'DamageDealt')
+                fighter1.fighter_result.distance = 0
 
             # Grab players killed
             if self.agents_killed != fighter1.data.get(u'PlayersKilled'):
@@ -182,18 +190,19 @@ class World:
                 fighter1.fighter_result.kill_count = 0
 
             fighter1.fighter_result.life = fighter1.data.get(u'Life')
+            # Average angle to other agent
             fighter1.fighter_result.angle = statistics.mean(fighter1.angle_list)
             print("Fighter 1 damage dealt: " + str(fighter1.fighter_result.damage_dealt))
-            print("Fighter 1 average angle: " + str(fighter1.fighter_result.angle) + "\n")
+            print("Fighter 1 average angle: " + str(fighter1.fighter_result.angle))
+            print("Fighter 1 distance travelled: " + str(fighter1.fighter_result.dist_travelled) + '\n')
 
-
-        if fighter2.data is not None:
-            print("Fighter 2 data: ")
-            print(fighter2.data)
-            print("")
+        # if fighter2.data is not None:
+        #     print("Fighter 2 data: ")
+        #     print(fighter2.data)
+        #     print("")
 
         # Only use fighter 1 fitness
-        fighter1_fitness = fighter1.fighter_result.GetFitness()
+        fighter1_fitness = fighter1.fighter_result.get_fitness()
 
         return fighter1_fitness
 
