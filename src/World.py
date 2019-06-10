@@ -6,101 +6,95 @@ import random
 import json
 import pickle
 import os
+import neat
+import statistics
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 from Fighter import Fighter
-import neat
-import statistics
-
-
-def get_mission_XML():
-    mission_xml = '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-    <Mission xmlns="http://ProjectMalmo.microsoft.com"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    
-      <About>
-        <Summary>Fighting 1v1</Summary>
-      </About>
-    
-      <ServerSection>
-        <ServerInitialConditions>
-                <Time>
-                    <StartTime>6000</StartTime>
-                    <AllowPassageOfTime>false</AllowPassageOfTime>
-                </Time>
-                <Weather>clear</Weather>
-                <AllowSpawning>false</AllowSpawning>
-        </ServerInitialConditions>
-        <ServerHandlers>
-          <FlatWorldGenerator generatorString="3;7,3*10;1;"/>
-          <DrawingDecorator>
-                <DrawLine type="diamond_block" y1="10" y2="10" x1="4" x2="4" z1="0" z2="11" />
-                <DrawLine type="diamond_block" y1="10" y2="10" x1="5" x2="5" z1="0" z2="11" />
-                <DrawLine type="diamond_block" y1="10" y2="10" x1="6" x2="6" z1="0" z2="11" />
-                <DrawLine type="diamond_block" y1="10" y2="10" x1="7" x2="7" z1="0" z2="11" />
-                <DrawLine type="diamond_block" y1="10" y2="10" x1="8" x2="8" z1="0" z2="11" />
-                <DrawLine type="diamond_block" y1="10" y2="10" x1="9" x2="9" z1="0" z2="11" />
-          </DrawingDecorator>
-    
-          <ServerQuitFromTimeUp description="" timeLimitMs="10000"/>
-          <ServerQuitWhenAnyAgentFinishes/>
-        </ServerHandlers>
-      </ServerSection>
-    
-      <AgentSection mode="Survival">
-        <Name>Fighter1</Name>
-        <AgentStart>
-            <Placement pitch="0" x="6" y="11" yaw="0" z="6"/>
-            <Inventory>
-                <InventoryItem slot="0" type="wooden_sword" quantity="1" />
-            </Inventory>
-    
-        </AgentStart>
-        <AgentHandlers>
-        <ObservationFromFullStats/>
-        <ContinuousMovementCommands turnSpeedDegs="360"/>
-          <ObservationFromNearbyEntities>
-            <Range name="entities" xrange="10" yrange="1" zrange="10"/>
-          </ObservationFromNearbyEntities>
-          <ObservationFromGrid>
-            <Grid name="floor">
-                <min x="-1" y="0" z="-1"/>
-                <max x="1" y="0" z="1"/> </Grid>
-          </ObservationFromGrid>
-          <RewardForTouchingBlockType>
-            <Block reward="-100.0" type="lava" behaviour="onceOnly"/>
-            </RewardForTouchingBlockType>
-        </AgentHandlers>
-      </AgentSection>
-      
-        <AgentSection mode="Survival">
-    <Name>Fighter2</Name>
-    <AgentStart>
-        <Inventory>
-                <InventoryItem slot="0" type="wooden_sword" quantity="1" />
-        </Inventory>
-        <Placement pitch="0" x="8" y="11" yaw="0" z="8"/>
-    </AgentStart>
-    <AgentHandlers>
-    <ObservationFromFullStats/>
-    <ContinuousMovementCommands turnSpeedDegs="360"/>
-      <ObservationFromNearbyEntities>
-        <Range name="entities" xrange="10" yrange="1" zrange="10"/>
-      </ObservationFromNearbyEntities>
-      <ObservationFromGrid>
-        <Grid name="floor">
-            <min x="-1" y="0" z="-1"/>
-            <max x="1" y="0" z="1"/> </Grid>
-      </ObservationFromGrid>
-    </AgentHandlers>
-  </AgentSection>
-    </Mission> '''
-
-    return mission_xml
 
 
 def get_mission():
-    mission_xml = get_mission_XML()
+    mission_xml = '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+      <Mission xmlns="http://ProjectMalmo.microsoft.com"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+        <About>
+          <Summary>Fighting 1v1</Summary>
+        </About>
+
+        <ServerSection>
+          <ServerInitialConditions>
+                  <Time>
+                      <StartTime>6000</StartTime>
+                      <AllowPassageOfTime>false</AllowPassageOfTime>
+                  </Time>
+                  <Weather>clear</Weather>
+                  <AllowSpawning>false</AllowSpawning>
+          </ServerInitialConditions>
+          <ServerHandlers>
+            <FlatWorldGenerator generatorString="3;7,3*10;1;"/>
+            <DrawingDecorator>
+                  <DrawLine type="diamond_block" y1="10" y2="10" x1="4" x2="4" z1="0" z2="11" />
+                  <DrawLine type="diamond_block" y1="10" y2="10" x1="5" x2="5" z1="0" z2="11" />
+                  <DrawLine type="diamond_block" y1="10" y2="10" x1="6" x2="6" z1="0" z2="11" />
+                  <DrawLine type="diamond_block" y1="10" y2="10" x1="7" x2="7" z1="0" z2="11" />
+                  <DrawLine type="diamond_block" y1="10" y2="10" x1="8" x2="8" z1="0" z2="11" />
+                  <DrawLine type="diamond_block" y1="10" y2="10" x1="9" x2="9" z1="0" z2="11" />
+            </DrawingDecorator>
+
+            <ServerQuitFromTimeUp description="" timeLimitMs="10000"/>
+            <ServerQuitWhenAnyAgentFinishes/>
+          </ServerHandlers>
+        </ServerSection>
+
+        <AgentSection mode="Survival">
+          <Name>Fighter1</Name>
+          <AgentStart>
+              <Placement pitch="0" x="6" y="11" yaw="0" z="6"/>
+              <Inventory>
+                  <InventoryItem slot="0" type="wooden_sword" quantity="1" />
+              </Inventory>
+
+          </AgentStart>
+          <AgentHandlers>
+          <ObservationFromFullStats/>
+          <ContinuousMovementCommands turnSpeedDegs="360"/>
+            <ObservationFromNearbyEntities>
+              <Range name="entities" xrange="10" yrange="1" zrange="10"/>
+            </ObservationFromNearbyEntities>
+            <ObservationFromGrid>
+              <Grid name="floor">
+                  <min x="-1" y="0" z="-1"/>
+                  <max x="1" y="0" z="1"/> </Grid>
+            </ObservationFromGrid>
+            <RewardForTouchingBlockType>
+              <Block reward="-100.0" type="lava" behaviour="onceOnly"/>
+              </RewardForTouchingBlockType>
+          </AgentHandlers>
+        </AgentSection>
+
+          <AgentSection mode="Survival">
+      <Name>Fighter2</Name>
+      <AgentStart>
+          <Inventory>
+                  <InventoryItem slot="0" type="wooden_sword" quantity="1" />
+          </Inventory>
+          <Placement pitch="0" x="8" y="11" yaw="0" z="8"/>
+      </AgentStart>
+      <AgentHandlers>
+      <ObservationFromFullStats/>
+      <ContinuousMovementCommands turnSpeedDegs="360"/>
+        <ObservationFromNearbyEntities>
+          <Range name="entities" xrange="10" yrange="1" zrange="10"/>
+        </ObservationFromNearbyEntities>
+        <ObservationFromGrid>
+          <Grid name="floor">
+              <min x="-1" y="0" z="-1"/>
+              <max x="1" y="0" z="1"/> </Grid>
+        </ObservationFromGrid>
+      </AgentHandlers>
+    </AgentSection>
+      </Mission> '''
     my_mission = MalmoPython.MissionSpec(mission_xml, True)
     return my_mission
 
@@ -113,12 +107,19 @@ class World:
         self.damage_list = []
         self.distance_list = []
         self.agents_killed = 0
+        self.checkpoint = neat.Checkpointer()
+        self.population = None
+        self.config = None
 
-    def train(self, population):
+    def train(self, population, config):
         i = 0
+        self.population = population
+        self.config = config
         while True:
             i += 1
-            self.best_genome = population.run(self.evaluate_genome, 1)
+            # Run forever, until manual interrupt
+            # Save at every generation
+            self.best_genome = population.run(self.evaluate_genome)
             with open('gen-{}-winner'.format(i), 'wb') as f:
                 pickle.dump(self.best_genome, f)
             return self.best_genome
@@ -128,9 +129,10 @@ class World:
         return self.run_fighters(*agents_fighter)
 
     def setup_fighters(self, genomes, config):
+        # Error checking
         if len(genomes) != 2:
             raise Exception("Size of argument genomes is not 2")
-
+        # Start agents
         agents = [MalmoPython.AgentHost() for i in range(len(genomes))]
         self.start_mission(agents)
         agents_fighter = []
@@ -142,8 +144,16 @@ class World:
     def evaluate_genome(self, genomes, config):
         for genome_id, genome in genomes:
             print("Running genome {}".format(genome_id))
+            # Save checkpoint every 50 new genomes
+            if (genome_id % 50) == 0:
+                neat.Checkpointer.save_checkpoint(neat.Checkpointer(), self.config, self.population, self.best_genome,
+                                                  genome_id)
             agents, agents_fighter = self.setup_fighters([genome, self.best_genome], config)
             genome.fitness = self.run_fighters(*agents_fighter)
+            # Save checkpoint if genome did well
+            if genome.fitness > 7500:
+                neat.Checkpointer.save_checkpoint(neat.Checkpointer(), self.config, self.population, self.best_genome,
+                                                  genome_id)
             del agents
             del agents_fighter
 

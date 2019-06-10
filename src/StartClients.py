@@ -43,14 +43,30 @@ if __name__ == "__main__":
         population, config = InitalizeNEATPopulation()
 
     population.add_reporter(neat.StdOutReporter(True))
-    population.add_reporter(neat.Checkpointer(100, 300))
+    # population.add_reporter(neat.Checkpointer(100, 1500))
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
 
-    try:
-        winner = world.train(population)
-    except KeyboardInterrupt:
-        winner = population.best_genome
+    check_pointer = neat.Checkpointer(generation_interval=1, filename_prefix='generation-checkpoint-')
+    population.add_reporter(check_pointer)
+    winner = world.train(population, config)
+
+
+    # except KeyboardInterrupt:
+    #     winner = population.best_genome
+
+    # if (check_pointer.last_generation_checkpoint >= 0) and (check_pointer.last_generation_checkpoint < 100):
+    #     filename = 'neat-checkpoint-{0}'.format(check_pointer.last_generation_checkpoint)
+    #     print("Restoring from {!s}".format(filename))
+    #     population2 = neat.checkpoint.Checkpointer.restore_checkpoint(filename)
+    #     population2.add_reporter(neat.StdOutReporter(True))
+    #     stats2 = neat.StatisticsReporter()
+    #     population2.add_reporter(stats2)
+    #
+    #     try:
+    #         winner2 = world.train(population2, config)
+    #     except KeyboardInterrupt:
+    #         winner = population.best_genome
 
 
 

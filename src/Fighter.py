@@ -102,7 +102,7 @@ class Fighter:
         print("move: {}".format(output[0]))
         print("strafe: {}".format(output[1]))
         print("turn: {}".format(output[2]))
-        print("attack: 1\n")
+        # print("attack: 1\n")
 
         self.agent.sendCommand("move {}".format(output[0]))
         self.agent.sendCommand("strafe {}".format(output[1]))
@@ -114,9 +114,8 @@ class Fighter:
     def _get_agent_state_input(self):
         to_return = []
         entities = self.data.get(u'entities')
-        #
-        # if self.data.get(u'PlayersKilled') == 1:
-        #     self.mission_ended = True
+        if self.data.get(u'PlayersKilled') == 1:
+            self.mission_ended = True
 
         agent_x, agent_z, agent_yaw = entities[0][u'x'], entities[0][u'z'], math.radians((entities[0][u'yaw'] - 90) % 360)
 
