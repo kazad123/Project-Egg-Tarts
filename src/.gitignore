@@ -38,3 +38,5 @@ Thumbs.db
 
 baddie1/
 checkpoints/
+test1/
+*.pyc
