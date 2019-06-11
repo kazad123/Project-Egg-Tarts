@@ -145,9 +145,9 @@ class World:
         for genome_id, genome in genomes:
             print("Running genome {}".format(genome_id))
             # Save checkpoint every 50 new genomes
-            if (genome_id % 50) == 0:
-                neat.Checkpointer.save_checkpoint(neat.Checkpointer(), self.config, self.population, self.best_genome,
-                                                  genome_id)
+            # if (genome_id % 50) == 0:
+            #     neat.Checkpointer.save_checkpoint(neat.Checkpointer(), self.config, self.population, self.best_genome,
+            #                                       genome_id)
             agents, agents_fighter = self.setup_fighters([genome, self.best_genome], config)
             genome.fitness = self.run_fighters(*agents_fighter)
             # Save checkpoint if genome did well

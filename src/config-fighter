@@ -58,10 +58,10 @@ enabled_mutate_rate     = 0.01
 compatibility_threshold = 3.0
 
 [DefaultStagnation]
-species_fitness_func = max
-max_stagnation  = 20
+species_fitness_func = mean
+max_stagnation  = 15
 
 [DefaultReproduction]
-elitism            = 2
+elitism            = 1
 survival_threshold = 0.2
 

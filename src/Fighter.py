@@ -114,8 +114,9 @@ class Fighter:
     def _get_agent_state_input(self):
         to_return = []
         entities = self.data.get(u'entities')
-        if self.data.get(u'PlayersKilled') == 1:
-            self.mission_ended = True
+        # Run forever for now
+        # if self.data.get(u'PlayersKilled') == 1:
+        #     self.mission_ended = True
 
         agent_x, agent_z, agent_yaw = entities[0][u'x'], entities[0][u'z'], math.radians((entities[0][u'yaw'] - 90) % 360)
 
