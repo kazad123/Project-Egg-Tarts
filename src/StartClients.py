@@ -37,6 +37,14 @@ if __name__ == "__main__":
     num_agents = 2
     world = World(SetupClientPools(num_agents))
 
+    # if len(sys.argv) == 3:
+    #     with open(sys.argv[1], 'rb') as g1:
+    #         genome1 = pickle.load(g1)
+    #     with open(sys.argv[2], 'rb') as g2:
+    #         genome2 = pickle.load(g2)
+    #
+    #     fitness = world.StartFight(genome1, genome2, InitalizeNeatConfig())
+
     if len(sys.argv) == 2:
         population, config = neat.Checkpointer.restore_checkpoint(str(sys.argv[1])), InitalizeNeatConfig()
     else:

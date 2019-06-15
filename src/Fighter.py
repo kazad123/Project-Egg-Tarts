@@ -33,12 +33,18 @@ def angle_between_agents(a1,a2,yaw1,b1,b2):
 
 
 def scale_state_inputs(state_inputs):
-    a, d = state_inputs
-    return [scale_angle(a), scale_distance(d)]
+    # a, d = state_inputs
+    # return [scale_angle(a), scale_distance(d)]
+    scaled_inputs = scale_distances(state_inputs[1:])
+    scaled_inputs.insert(0, scale_angle(state_inputs[0]))
+    return scaled_inputs
 
 
-def scale_distance(distance):
-    return distance/9
+def scale_distances(input_dist):
+    ret = []
+    for dist in input_dist:
+        ret.append((dist/9))
+    return ret
 
 
 def scale_angle(theta):
@@ -136,7 +142,18 @@ class Fighter:
             # print("Angle: " + str(degrees))
             to_return.extend([angle_between_agents(agent_x, agent_z, agent_yaw, closest_ent_x, closest_ent_z),
                               closest_ent_dist])
+
+            # add inputs: x and y distance to other agent, distance from each side of platform
+            xmin, xmax, zmin, zmax = 4, 9, 0, 11
+
+            d_xmin = agent_x - xmin
+            d_xmax = xmax - agent_x
+            d_zmin = agent_z - zmin
+            d_zmax = zmax - agent_z
+
+            to_return.extend([closest_ent_x, closest_ent_z, d_xmin, d_xmax, d_zmin, d_zmax])
+
         else:
-            to_return.extend([0, 0])
+            to_return.extend([0, 0, 0, 0, 0, 0, 0, 0])
 
         return to_return
